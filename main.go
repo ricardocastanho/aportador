@@ -10,22 +10,22 @@ import (
 )
 
 var (
-	label  []string
-	data   []string
-	values = make(map[string]float64)
+	raw = make(map[string][]string)
+	res = make(map[string]float64)
 )
 
 func main() {
+	const grahanConstant = 22.5
 	ticker := "BBAS3"
 
 	c := colly.NewCollector()
 
 	c.OnHTML("table tbody td.label span.txt", func(e *colly.HTMLElement) {
-		label = append(label, e.Text)
+		raw["label"] = append(raw["label"], e.Text)
 	})
 
 	c.OnHTML("table tbody td.data span", func(e *colly.HTMLElement) {
-		data = append(data, e.Text)
+		raw["data"] = append(raw["data"], e.Text)
 	})
 
 	c.OnRequest(func(r *colly.Request) {
@@ -33,9 +33,9 @@ func main() {
 	})
 
 	c.OnScraped(func(r *colly.Response) {
-		for i := range data {
-			if label[i] == "LPA" || label[i] == "VPA" {
-				s := strings.ReplaceAll(data[i], ",", ".")
+		for i := range raw["data"] {
+			if raw["label"][i] == "LPA" || raw["label"][i] == "VPA" || raw["label"][i] == "Cotação" {
+				s := strings.ReplaceAll(raw["data"][i], ",", ".")
 				n, err := strconv.ParseFloat(s, 64)
 
 				if err != nil {
@@ -43,14 +43,17 @@ func main() {
 					return
 				}
 
-				values[label[i]] = n
+				res[raw["label"][i]] = n
 			}
 		}
 
-		grahan := math.Sqrt(22.5 * values["LPA"] * values["VPA"])
+		grahan := math.Sqrt(grahanConstant * res["LPA"] * res["VPA"])
+		safeMargin := ((grahan - res["Cotação"]) / res["Cotação"]) * 100
 
-		fmt.Println("Método Grahan:")
-		fmt.Printf("%s: %f\n", ticker, grahan)
+		fmt.Printf("Ticker: %s\n", ticker)
+		fmt.Printf("Actual Price: %f\n", res["Cotação"])
+		fmt.Printf("Grahan Fair Price: %f\n", grahan)
+		fmt.Printf("Grahan Safe margin: %f\n", safeMargin)
 	})
 
 	c.Visit(fmt.Sprintf("https://www.fundamentus.com.br/detalhes.php?papel=%s", ticker))
