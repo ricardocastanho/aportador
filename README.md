@@ -26,3 +26,9 @@ Searching Brazilian stocks fair values. You can find the tickers [here](https://
 ```shell
 go run main.go search --tickers BBAS3,TAEE11,PETR4
 ```
+
+Searching Brazilian stocks fair prices to get 10 percent of dividend yield considering the last 2 years of dividend history.
+
+```shell
+go run main.go search --tickers BBAS3,TAEE11,PETR4 --dividend-yield 10 --dividend-years 2
+```
