@@ -41,7 +41,15 @@ func GetBarsi(ticker string, ActualPrice float64) Barsi {
 			}
 
 			if cont == 3 && raw["data"][i] != "- " {
-				year := fmt.Sprintf("%c%c%c%c", raw["data"][i][6], raw["data"][i][7], raw["data"][i][8], raw["data"][i][9])
+				layout := "02/01/2006"
+				date, err := time.Parse(layout, strings.TrimSpace(raw["data"][i]))
+
+				if err != nil {
+					fmt.Println("Error while parsing date: ", err)
+					return
+				}
+
+				year := strconv.Itoa(date.Year())
 
 				s := strings.ReplaceAll(raw["data"][i-2], ",", ".")
 				amount, err := strconv.ParseFloat(s, 64)
