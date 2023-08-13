@@ -77,7 +77,7 @@ func GetBarsi(ticker string, ActualPrice float64) Barsi {
 		barsi.SafeMargin = ((barsi.FairPrice - barsi.ActualPrice) / barsi.ActualPrice) * 100
 	})
 
-	c.Visit(fmt.Sprintf("https://www.fundamentus.com.br/proventos.php?papel=%s&tipo=2&chbAgruparAno=", ticker))
+	c.Visit(fmt.Sprintf("https://www.fundamentus.com.br/proventos.php?papel=%s&tipo=2", ticker))
 
 	return barsi
 }
