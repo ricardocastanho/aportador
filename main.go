@@ -35,15 +35,29 @@ func main() {
 						Usage:   "Stocks' ticker in Brazilian stock exchange splited by comma with no spaces",
 						Aliases: []string{"t"},
 					},
+					&cli.Float64Flag{
+						Name:    "dividend-yield",
+						Value:   6,
+						Usage:   "Dividend yield target in Barsi's principle",
+						Aliases: []string{"dy"},
+					},
+					&cli.Float64Flag{
+						Name:    "dividend-years",
+						Value:   5,
+						Usage:   "Number of years to get the dividend average per year in Barsi's formula",
+						Aliases: []string{"dh"},
+					},
 				},
 				Action: func(ctx *cli.Context) error {
 					var results []Result
 
 					tickers := ctx.StringSlice("tickers")
+					dividendYield := ctx.Float64("dividend-yield")
+					dividendYears := ctx.Float64("dividend-years")
 
 					for _, ticker := range tickers {
 						grahan := principles.GetGrahan(ticker)
-						barsi := principles.GetBarsi(ticker, grahan.ActualPrice)
+						barsi := principles.GetBarsi(ticker, grahan.ActualPrice, dividendYield/100, dividendYears)
 
 						results = append(results, Result{
 							Ticker:           ticker,

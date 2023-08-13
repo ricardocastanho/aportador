@@ -11,15 +11,20 @@ import (
 
 type Barsi struct {
 	Ticker        string
-	DividendGoal  float64
+	DividendYield float64
 	DividendYears float64
 	ActualPrice   float64
 	FairPrice     float64
 	SafeMargin    float64
 }
 
-func GetBarsi(ticker string, ActualPrice float64) Barsi {
-	barsi := Barsi{Ticker: ticker, DividendGoal: 0.06, DividendYears: 5, ActualPrice: ActualPrice}
+func GetBarsi(ticker string, actualPrice, dividendYield, dividendYears float64) Barsi {
+	barsi := Barsi{
+		Ticker:        ticker,
+		DividendYield: dividendYield,
+		DividendYears: dividendYears,
+		ActualPrice:   actualPrice,
+	}
 
 	var (
 		raw     = make(map[string][]string)
@@ -73,7 +78,7 @@ func GetBarsi(ticker string, ActualPrice float64) Barsi {
 			total = total + amounts[strconv.Itoa(currentYear-i)]
 		}
 
-		barsi.FairPrice = (total / barsi.DividendYears) / barsi.DividendGoal
+		barsi.FairPrice = (total / barsi.DividendYears) / barsi.DividendYield
 		barsi.SafeMargin = ((barsi.FairPrice - barsi.ActualPrice) / barsi.ActualPrice) * 100
 	})
 
