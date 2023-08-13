@@ -11,7 +11,16 @@ import (
 
 const GRAHAN = 22.5
 
-func Grahan(ticker string) float64 {
+type Grahan struct {
+	Ticker      string
+	ActualPrice float64
+	FairPrice   float64
+	SafeMargin  float64
+}
+
+func GetGrahan(ticker string) Grahan {
+	grahan := Grahan{Ticker: ticker}
+
 	var (
 		raw = make(map[string][]string)
 		res = make(map[string]float64)
@@ -42,16 +51,12 @@ func Grahan(ticker string) float64 {
 			}
 		}
 
-		grahan := math.Sqrt(GRAHAN * res["LPA"] * res["VPA"])
-		safeMargin := ((grahan - res["Cotação"]) / res["Cotação"]) * 100
-
-		fmt.Printf("Ticker: %s\n", ticker)
-		fmt.Printf("Actual price: %f\n", res["Cotação"])
-		fmt.Printf("Grahan fair price: %f\n", grahan)
-		fmt.Printf("Grahan safe margin: %f\n", safeMargin)
+		grahan.ActualPrice = res["Cotação"]
+		grahan.FairPrice = math.Sqrt(GRAHAN * res["LPA"] * res["VPA"])
+		grahan.SafeMargin = ((grahan.FairPrice - grahan.ActualPrice) / grahan.ActualPrice) * 100
 	})
 
 	c.Visit(fmt.Sprintf("https://www.fundamentus.com.br/detalhes.php?papel=%s", ticker))
 
-	return res["Cotação"]
+	return grahan
 }

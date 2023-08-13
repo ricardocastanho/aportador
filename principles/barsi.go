@@ -9,7 +9,18 @@ import (
 	colly "github.com/gocolly/colly/v2"
 )
 
-func Barsi(ticker string, price float64) {
+type Barsi struct {
+	Ticker        string
+	DividendGoal  float64
+	DividendYears float64
+	ActualPrice   float64
+	FairPrice     float64
+	SafeMargin    float64
+}
+
+func GetBarsi(ticker string, ActualPrice float64) Barsi {
+	barsi := Barsi{Ticker: ticker, DividendGoal: 0.06, DividendYears: 5, ActualPrice: ActualPrice}
+
 	var (
 		raw     = make(map[string][]string)
 		amounts = make(map[string]float64)
@@ -50,17 +61,15 @@ func Barsi(ticker string, price float64) {
 
 		var total float64
 
-		for i := 1; i <= 5; i++ {
+		for i := 1; i <= int(barsi.DividendYears); i++ {
 			total = total + amounts[strconv.Itoa(currentYear-i)]
 		}
 
-		avg := total / 5
-		barsi := avg / 0.06
-		safeMargin := ((barsi - price) / price) * 100
-
-		fmt.Printf("Barsi fair price: %f\n", barsi)
-		fmt.Printf("Barsi safe margin: %f\n", safeMargin)
+		barsi.FairPrice = (total / barsi.DividendYears) / barsi.DividendGoal
+		barsi.SafeMargin = ((barsi.FairPrice - barsi.ActualPrice) / barsi.ActualPrice) * 100
 	})
 
 	c.Visit(fmt.Sprintf("https://www.fundamentus.com.br/proventos.php?papel=%s&tipo=2&chbAgruparAno=", ticker))
+
+	return barsi
 }
