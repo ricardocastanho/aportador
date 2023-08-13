@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 )
@@ -15,29 +16,33 @@ func main() {
 		Usage: "Find Brazilian stocks best prices",
 		Commands: []*cli.Command{
 			{
-				Name:    "aportar",
-				Aliases: []string{"a"},
-				Usage:   "Shows fair prices and safe margin from a stock by ticket",
+				Name:    "search",
+				Aliases: []string{"s"},
+				Usage:   "Shows fair prices and safe margin from a stock",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "ticker",
-						Value:   "BBAS3",
-						Usage:   "Stock's ticker in Brazilian stock exchange",
+						Name:    "tickers",
+						Value:   "BBAS3,TAEE11",
+						Usage:   "Stock's ticker in Brazilian stock exchange splited by comma with no spaces",
 						Aliases: []string{"t"},
 					},
 				},
 				Action: func(ctx *cli.Context) error {
-					ticker := ctx.String("ticker")
+					tickers := strings.Split(ctx.String("tickers"), ",")
 
-					grahan := principles.GetGrahan(ticker)
-					barsi := principles.GetBarsi(ticker, grahan.ActualPrice)
+					for _, ticker := range tickers {
+						grahan := principles.GetGrahan(ticker)
+						barsi := principles.GetBarsi(ticker, grahan.ActualPrice)
 
-					fmt.Printf("Ticker: %s\n", ticker)
-					fmt.Printf("Actual price: %f\n", grahan.ActualPrice)
-					fmt.Printf("Grahan fair price: %f\n", grahan.FairPrice)
-					fmt.Printf("Barsi fair price: %f\n", barsi.FairPrice)
-					fmt.Printf("Grahan safe margin: %f\n", grahan.FairPrice)
-					fmt.Printf("Barsi safe margin: %f\n", barsi.SafeMargin)
+						fmt.Printf("Ticker: %s\n", ticker)
+						fmt.Printf("Actual price: %f\n", grahan.ActualPrice)
+						fmt.Printf("Grahan fair price: %f\n", grahan.FairPrice)
+						fmt.Printf("Barsi fair price: %f\n", barsi.FairPrice)
+						fmt.Printf("Grahan safe margin: %f\n", grahan.FairPrice)
+						fmt.Printf("Barsi safe margin: %f\n", barsi.SafeMargin)
+						fmt.Println("-----------------")
+					}
+
 					return nil
 				},
 			},
