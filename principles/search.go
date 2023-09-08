@@ -3,12 +3,12 @@ package principles
 import "sort"
 
 type Result struct {
-	Ticker           string
-	ActualPrice      float64
-	GrahanFairPrice  float64
-	GrahanSafeMargin float64
-	BazinFairPrice   float64
-	BazinSafeMargin  float64
+	Ticker           string  `json:"ticker"`
+	ActualPrice      float64 `json:"actualPrice"`
+	GrahanFairPrice  float64 `json:"grahanFairPrice"`
+	GrahanSafeMargin float64 `json:"grahanSafeMargin"`
+	BazinFairPrice   float64 `json:"bazinFairPrice"`
+	BazinSafeMargin  float64 `json:"bazinSafeMargin"`
 }
 
 func GetStocks(tickers []string, dividendYield, dividendYears float64) ([]Result, error) {

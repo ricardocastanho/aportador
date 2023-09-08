@@ -10,15 +10,29 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type CustomResponse struct {
+	Data  interface{} `json:"data"`
+	Error interface{} `json:"error"`
+}
+
 func sendJSONResponse(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(data); err != nil {
+	response := CustomResponse{Data: data, Error: nil}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func sendErrorResponse(w http.ResponseWriter, err interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	response := CustomResponse{Data: nil, Error: err}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
-	sendJSONResponse(w, map[string]interface{}{"data": map[string]string{"message": "Hello, World!"}})
+	sendJSONResponse(w, map[string]string{"message": "Hello, World!"})
 }
 
 func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +41,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 	stocks := r.URL.Query()["stock"]
 
 	if len(stocks) == 0 {
-		sendJSONResponse(w, map[string]interface{}{"error": map[string]string{"message": "No stocks provided"}})
+		sendJSONResponse(w, map[string]string{"message": "No stocks provided"})
 		return
 	}
 
@@ -38,7 +52,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 	if dy != "" {
 		dividendYield, err = strconv.ParseFloat(dy, 64)
 		if err != nil {
-			sendJSONResponse(w, map[string]interface{}{"error": map[string]string{"message": "Error while parsing dividend yield input"}})
+			sendErrorResponse(w, map[string]string{"message": "Error while parsing dividend yield input"})
 			return
 		}
 	}
@@ -47,7 +61,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 	if dys != "" {
 		dividendYears, err = strconv.ParseFloat(dys, 64)
 		if err != nil {
-			sendJSONResponse(w, map[string]interface{}{"error": map[string]string{"message": "Error while parsing dividend years input"}})
+			sendErrorResponse(w, map[string]string{"message": "Error while parsing dividend years input"})
 			return
 		}
 	}
@@ -55,7 +69,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 	results, err := principles.GetStocks(stocks, dividendYield, dividendYears)
 	if err != nil {
 		fmt.Println("Error getting stocks data:", err)
-		sendJSONResponse(w, map[string]interface{}{"error": map[string]string{"message": "Error getting stocks data"}})
+		sendErrorResponse(w, map[string]string{"message": "Error getting stocks data"})
 		return
 	}
 
