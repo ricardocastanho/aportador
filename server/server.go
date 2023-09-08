@@ -41,7 +41,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 	stocks := r.URL.Query()["stock"]
 
 	if len(stocks) == 0 {
-		sendJSONResponse(w, map[string]string{"message": "No stocks provided"})
+		sendErrorResponse(w, map[string]string{"message": "No stocks provided"})
 		return
 	}
 
