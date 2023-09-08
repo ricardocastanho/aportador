@@ -2,22 +2,13 @@ package main
 
 import (
 	"aportador/principles"
+	"aportador/server"
 	"fmt"
 	"log"
 	"os"
-	"sort"
 
 	"github.com/urfave/cli/v2"
 )
-
-type Result struct {
-	Ticker           string
-	ActualPrice      float64
-	GrahanFairPrice  float64
-	GrahanSafeMargin float64
-	BarsiFairPrice   float64
-	BarsiSafeMargin  float64
-}
 
 func main() {
 	app := &cli.App{
@@ -49,35 +40,35 @@ func main() {
 					},
 				},
 				Action: func(ctx *cli.Context) error {
-					var results []Result
-
 					tickers := ctx.StringSlice("tickers")
 					dividendYield := ctx.Float64("dividend-yield")
 					dividendYears := ctx.Float64("dividend-years")
 
-					for _, ticker := range tickers {
-						grahan := principles.GetGrahan(ticker)
-						barsi := principles.GetBarsi(ticker, grahan.ActualPrice, dividendYield/100, dividendYears)
+					results, err := principles.GetStocks(tickers, dividendYield, dividendYears)
 
-						results = append(results, Result{
-							Ticker:           ticker,
-							ActualPrice:      grahan.ActualPrice,
-							GrahanFairPrice:  grahan.FairPrice,
-							GrahanSafeMargin: grahan.SafeMargin,
-							BarsiFairPrice:   barsi.FairPrice,
-							BarsiSafeMargin:  barsi.SafeMargin,
-						})
+					if err != nil {
+						fmt.Println("Error getting stocks data.")
+						return err
 					}
-
-					sort.Slice(results, func(i, j int) bool {
-						if results[i].BarsiSafeMargin == results[j].BarsiSafeMargin {
-							return results[i].GrahanSafeMargin > results[j].GrahanSafeMargin
-						}
-						return results[i].BarsiSafeMargin > results[j].BarsiSafeMargin
-					})
 
 					printResults(results)
 					return nil
+				},
+			},
+			{
+				Name:  "serve",
+				Usage: "Create HTTP server",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "port",
+						Value:   "4000",
+						Usage:   "Server port",
+						Aliases: []string{"p"},
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					port := ctx.String("port")
+					return server.CreateServer(":" + port)
 				},
 			},
 		},
@@ -88,13 +79,13 @@ func main() {
 	}
 }
 
-func printResults(results []Result) {
+func printResults(results []principles.Result) {
 	for _, result := range results {
 		printResult(result)
 	}
 }
 
-func printResult(result Result) {
+func printResult(result principles.Result) {
 	fmt.Println("-----------------")
 	fmt.Printf("Ticker: %s\n", result.Ticker)
 	fmt.Printf("Actual price: %f\n", result.ActualPrice)
