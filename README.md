@@ -26,11 +26,17 @@ Warren Graham (known as "Graham") is a fictional investor created by Benjamin Gr
 Searching Brazilian stocks fair values. You can find the tickers [here](https://www.b3.com.br/pt_br/produtos-e-servicos/negociacao/renda-variavel/empresas-listadas.htm).
 
 ```shell
-go run main.go search --tickers BBAS3,TAEE11,PETR4
+go run main.go stocks --tickers BBAS3,TAEE11,PETR4
 ```
 
 Searching Brazilian stocks fair prices to get 10 percent of dividend yield considering the last 2 years of dividend history.
 
 ```shell
-go run main.go search --tickers BBAS3,TAEE11,PETR4 --dividend-yield 10 --dividend-years 2
+go run main.go stocks --tickers BBAS3,TAEE11,PETR4 --dividend-yield 10 --dividend-years 2
+```
+
+Listen HTTP server
+
+```shell
+go run main.go serve
 ```

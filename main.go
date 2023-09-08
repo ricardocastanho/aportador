@@ -16,7 +16,7 @@ func main() {
 		Usage: "Find Brazilian stocks best prices",
 		Commands: []*cli.Command{
 			{
-				Name:    "search",
+				Name:    "stocks",
 				Aliases: []string{"s"},
 				Usage:   "Shows fair prices and safe margin from a stock",
 				Flags: []cli.Flag{
@@ -57,7 +57,7 @@ func main() {
 			},
 			{
 				Name:  "serve",
-				Usage: "Create HTTP server",
+				Usage: "Listen HTTP server",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "port",
