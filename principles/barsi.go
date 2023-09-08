@@ -9,7 +9,7 @@ import (
 	colly "github.com/gocolly/colly/v2"
 )
 
-type Barsi struct {
+type Bazin struct {
 	Ticker        string
 	DividendYield float64
 	DividendYears float64
@@ -18,8 +18,8 @@ type Barsi struct {
 	SafeMargin    float64
 }
 
-func GetBarsi(ticker string, actualPrice, dividendYield, dividendYears float64) Barsi {
-	barsi := Barsi{
+func GetBazin(ticker string, actualPrice, dividendYield, dividendYears float64) Bazin {
+	bazin := Bazin{
 		Ticker:        ticker,
 		DividendYield: dividendYield,
 		DividendYears: dividendYears,
@@ -74,15 +74,15 @@ func GetBarsi(ticker string, actualPrice, dividendYield, dividendYears float64) 
 
 		var total float64
 
-		for i := 1; i <= int(barsi.DividendYears); i++ {
+		for i := 1; i <= int(bazin.DividendYears); i++ {
 			total = total + amounts[strconv.Itoa(currentYear-i)]
 		}
 
-		barsi.FairPrice = (total / barsi.DividendYears) / barsi.DividendYield
-		barsi.SafeMargin = ((barsi.FairPrice - barsi.ActualPrice) / barsi.ActualPrice) * 100
+		bazin.FairPrice = (total / bazin.DividendYears) / bazin.DividendYield
+		bazin.SafeMargin = ((bazin.FairPrice - bazin.ActualPrice) / bazin.ActualPrice) * 100
 	})
 
 	c.Visit(fmt.Sprintf("https://www.fundamentus.com.br/proventos.php?papel=%s&tipo=2", ticker))
 
-	return barsi
+	return bazin
 }

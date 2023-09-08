@@ -29,13 +29,13 @@ func main() {
 					&cli.Float64Flag{
 						Name:    "dividend-yield",
 						Value:   6,
-						Usage:   "Dividend yield target in Barsi's principle",
+						Usage:   "Dividend yield target in Bazin's principle",
 						Aliases: []string{"dy"},
 					},
 					&cli.Float64Flag{
 						Name:    "dividend-years",
 						Value:   5,
-						Usage:   "Number of years to get the dividend average per year in Barsi's formula",
+						Usage:   "Number of years to get the dividend average per year in Bazin's formula",
 						Aliases: []string{"dh"},
 					},
 				},
@@ -90,8 +90,8 @@ func printResult(result principles.Result) {
 	fmt.Printf("Ticker: %s\n", result.Ticker)
 	fmt.Printf("Actual price: %f\n", result.ActualPrice)
 	fmt.Printf("Grahan fair price: %f\n", result.GrahanFairPrice)
-	fmt.Printf("Barsi fair price: %f\n", result.BarsiFairPrice)
+	fmt.Printf("Bazin fair price: %f\n", result.BazinFairPrice)
 	fmt.Printf("Grahan safe margin: %f\n", result.GrahanSafeMargin)
-	fmt.Printf("Barsi safe margin: %f\n", result.BarsiSafeMargin)
+	fmt.Printf("Bazin safe margin: %f\n", result.BazinSafeMargin)
 	fmt.Println("-----------------")
 }
