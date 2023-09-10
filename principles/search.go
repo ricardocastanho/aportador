@@ -11,12 +11,12 @@ type Result struct {
 	BazinSafeMargin  float64 `json:"bazinSafeMargin"`
 }
 
-func GetStocks(tickers []string, dividendYield, dividendYears float64) ([]Result, error) {
+func GetStocks(tickers []string, dividendYield, dividendHistory float64) ([]Result, error) {
 	var results []Result
 
 	for _, ticker := range tickers {
 		grahan := GetGrahan(ticker)
-		bazin := GetBazin(ticker, grahan.ActualPrice, dividendYield/100, dividendYears)
+		bazin := GetBazin(ticker, grahan.ActualPrice, dividendYield/100, dividendHistory)
 
 		results = append(results, Result{
 			Ticker:           ticker,

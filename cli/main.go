@@ -1,16 +1,15 @@
-package main
+package cli
 
 import (
 	"aportador/principles"
 	"aportador/server"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/urfave/cli/v2"
 )
 
-func main() {
+func CreateCLI() error {
 	app := &cli.App{
 		Name:  "Aportador",
 		Usage: "Find Brazilian stocks best prices",
@@ -33,7 +32,7 @@ func main() {
 						Aliases: []string{"dy"},
 					},
 					&cli.Float64Flag{
-						Name:    "dividend-years",
+						Name:    "dividend-history",
 						Value:   5,
 						Usage:   "Number of years to get the dividend average per year in Bazin's formula",
 						Aliases: []string{"dh"},
@@ -42,16 +41,16 @@ func main() {
 				Action: func(ctx *cli.Context) error {
 					tickers := ctx.StringSlice("tickers")
 					dividendYield := ctx.Float64("dividend-yield")
-					dividendYears := ctx.Float64("dividend-years")
+					dividendHistory := ctx.Float64("dividend-history")
 
-					results, err := principles.GetStocks(tickers, dividendYield, dividendYears)
+					results, err := principles.GetStocks(tickers, dividendYield, dividendHistory)
 
 					if err != nil {
 						fmt.Println("Error getting stocks data.")
 						return err
 					}
 
-					printResults(results)
+					PrintResults(results)
 					return nil
 				},
 			},
@@ -74,18 +73,16 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
-	}
+	return app.Run(os.Args)
 }
 
-func printResults(results []principles.Result) {
+func PrintResults(results []principles.Result) {
 	for _, result := range results {
-		printResult(result)
+		PrintResult(result)
 	}
 }
 
-func printResult(result principles.Result) {
+func PrintResult(result principles.Result) {
 	fmt.Println("-----------------")
 	fmt.Printf("Ticker: %s\n", result.Ticker)
 	fmt.Printf("Actual price: %f\n", result.ActualPrice)

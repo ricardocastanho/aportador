@@ -32,7 +32,7 @@ go run main.go stocks --tickers BBAS3,TAEE11,PETR4
 Searching Brazilian stocks fair prices to get 10 percent of dividend yield considering the last 2 years of dividend history.
 
 ```shell
-go run main.go stocks --tickers BBAS3,TAEE11,PETR4 --dividend-yield 10 --dividend-years 2
+go run main.go stocks --tickers BBAS3,TAEE11,PETR4 --dividend-yield 10 --dividend-history 2
 ```
 
 Listen HTTP server

@@ -1,0 +1,23 @@
+service: aportador
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: go1.x
+  memorySize: 512
+  timeout: 5
+  deploymentMethod: direct
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+functions:
+  search:
+    handler: bin/aportador
+    events:
+      - httpApi:
+          path: /search
+          method: get

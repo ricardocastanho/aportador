@@ -45,7 +45,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dividendYield, dividendYears = 10.0, 3.0
+	var dividendYield, dividendHistory = 10.0, 3.0
 	var err error
 
 	dy := r.URL.Query().Get("dividendYield")
@@ -57,16 +57,16 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	dys := r.URL.Query().Get("dividendYears")
+	dys := r.URL.Query().Get("dividendHistory")
 	if dys != "" {
-		dividendYears, err = strconv.ParseFloat(dys, 64)
+		dividendHistory, err = strconv.ParseFloat(dys, 64)
 		if err != nil {
 			sendErrorResponse(w, map[string]string{"message": "Error while parsing dividend years input"})
 			return
 		}
 	}
 
-	results, err := principles.GetStocks(stocks, dividendYield, dividendYears)
+	results, err := principles.GetStocks(stocks, dividendYield, dividendHistory)
 	if err != nil {
 		fmt.Println("Error getting stocks data:", err)
 		sendErrorResponse(w, map[string]string{"message": "Error getting stocks data"})

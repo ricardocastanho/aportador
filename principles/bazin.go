@@ -10,20 +10,20 @@ import (
 )
 
 type Bazin struct {
-	Ticker        string
-	DividendYield float64
-	DividendYears float64
-	ActualPrice   float64
-	FairPrice     float64
-	SafeMargin    float64
+	Ticker          string
+	DividendYield   float64
+	DividendHistory float64
+	ActualPrice     float64
+	FairPrice       float64
+	SafeMargin      float64
 }
 
-func GetBazin(ticker string, actualPrice, dividendYield, dividendYears float64) Bazin {
+func GetBazin(ticker string, actualPrice, dividendYield, dividendHistory float64) Bazin {
 	bazin := Bazin{
-		Ticker:        ticker,
-		DividendYield: dividendYield,
-		DividendYears: dividendYears,
-		ActualPrice:   actualPrice,
+		Ticker:          ticker,
+		DividendYield:   dividendYield,
+		DividendHistory: dividendHistory,
+		ActualPrice:     actualPrice,
 	}
 
 	var (
@@ -74,11 +74,11 @@ func GetBazin(ticker string, actualPrice, dividendYield, dividendYears float64) 
 
 		var total float64
 
-		for i := 1; i <= int(bazin.DividendYears); i++ {
+		for i := 1; i <= int(bazin.DividendHistory); i++ {
 			total = total + amounts[strconv.Itoa(currentYear-i)]
 		}
 
-		bazin.FairPrice = (total / bazin.DividendYears) / bazin.DividendYield
+		bazin.FairPrice = (total / bazin.DividendHistory) / bazin.DividendYield
 		bazin.SafeMargin = ((bazin.FairPrice - bazin.ActualPrice) / bazin.ActualPrice) * 100
 	})
 
