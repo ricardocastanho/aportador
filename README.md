@@ -20,23 +20,3 @@ Décio Bazin (1913-2008) was a prominent Brazilian economist, investor, and auth
 ## Who is Graham?
 
 Warren Graham (known as "Graham") is a fictional investor created by Benjamin Graham, considered the "father" of value investing. Graham is notable for his disciplined, fundamental analysis-based approach. His classic book "The Intelligent Investor" influenced generations of investors throughout the 20th century and remains a reference in the field of investments. Through his ideas, Graham promoted the importance of buying shares of undervalued companies relative to their intrinsic value, seeking margins of safety and minimizing risks.
-
-## Commands
-
-Searching Brazilian stocks fair values. You can find the tickers [here](https://www.b3.com.br/pt_br/produtos-e-servicos/negociacao/renda-variavel/empresas-listadas.htm).
-
-```shell
-go run main.go stocks --tickers BBAS3,TAEE11,PETR4
-```
-
-Searching Brazilian stocks fair prices to get 10 percent of dividend yield considering the last 2 years of dividend history.
-
-```shell
-go run main.go stocks --tickers BBAS3,TAEE11,PETR4 --dividend-yield 10 --dividend-history 2
-```
-
-Listen HTTP server
-
-```shell
-go run main.go serve
-```
