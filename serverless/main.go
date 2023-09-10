@@ -12,7 +12,6 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 )
 
@@ -52,7 +51,7 @@ func handleError(logger zerolog.Logger, msg string, err error, statusCode int) (
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Response, error) {
 	mainLogger := logger.
 		With().
-		Str("requestID", uuid.New().String()).
+		Str("requestId", request.RequestContext.RequestID).
 		Str("stocks", request.QueryStringParameters["stock"]).
 		// .Str("fiis", request.QueryStringParameters["fii"]).
 		Str("dividend-yield", request.QueryStringParameters["dividendYield"]).
