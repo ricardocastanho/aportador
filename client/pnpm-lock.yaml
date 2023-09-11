@@ -8,6 +8,9 @@ dependencies:
   '@mdi/font':
     specifier: 7.0.96
     version: 7.0.96
+  '@vercel/analytics':
+    specifier: ^1.0.2
+    version: 1.0.2
   core-js:
     specifier: ^3.29.0
     version: 3.32.2
@@ -503,6 +506,10 @@ packages:
       '@typescript-eslint/types': 5.62.0
       eslint-visitor-keys: 3.4.3
     dev: true
+
+  /@vercel/analytics@1.0.2:
+    resolution: {integrity: sha512-BZFxVrv24VbNNl5xMxqUojQIegEeXMI6rX3rg1uVLYUEXsuKNBSAEQf4BWEcjQDp/8aYJOj6m8V4PUA3x/cxgg==}
+    dev: false
 
   /@vitejs/plugin-vue@4.3.4(vite@4.4.9)(vue@3.3.4):
     resolution: {integrity: sha512-ciXNIHKPriERBisHFBvnTbfKa6r9SAesOYXeGDzgegcvy9Q4xdScSHAmKbNT0M3O0S9LKhIf5/G+UYG4NnnzYw==}
