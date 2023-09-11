@@ -1,72 +1,78 @@
 <template>
-  <v-container class="fill-height">
-    <v-responsive class="align-center text-center fill-height mx-auto" max-width="1000">
-      <h1 class="text-h2 font-weight-bold mb-2">Aportador</h1>
-      <div class="text-body-2 font-weight-light mb-6">
-        Descubra o preço teto das suas ações
-      </div>
-      <v-text-field
-        :value="ticker"
-        label="Ticker"
-        variant="solo"
-        class="ma-6"
-        append-icon="mdi-magnify"
-        @update:model-value="(t) => toUpperCase(t)"
-        @click:append="search"
-      />
+  <v-container>
+    <v-row class="align-center text-center mt-16">
+      <v-col>
+        <h1 class="text-h2 font-weight-bold mb-2">Aportador</h1>
+        <div class="text-body-2 font-weight-light mb-6">
+          Descubra o preço teto das suas ações
+        </div>
+        <v-text-field
+          :value="ticker"
+          label="Ticker"
+          variant="solo"
+          class="ma-6"
+          append-icon="mdi-magnify"
+          @update:model-value="(t) => toUpperCase(t)"
+          @click:append="search"
+        />
+      </v-col>
+    </v-row>
 
-      <div class="my-5"></div>
+    <v-row class="align-center text-center">
+      <v-col>
+        <div class="my-5"></div>
 
-      <v-table>
-        <thead>
-          <tr>
-            <th class="text-left">
-              Ticker
-            </th>
-            <th class="text-left">
-              Preço atual
-            </th>
-            <th class="text-left">
-              Preço teto Grahan
-            </th>
-            <th class="text-left">
-              Margem de segurança Grahan
-            </th>
-            <th class="text-left">
-              Preço teto Bazin
-            </th>
-            <th class="text-left">
-              Margem de segurança Bazin
-            </th>
-            <th class="text-left"/>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(stock, i) in stocks"
-            :key="stock.ticker"
-          >
-            <td>{{ stock.ticker }}</td>
-            <td>R$ {{ stock.actualPrice.toFixed(2) }}</td>
-            <td :class="stock.grahanFairPrice > stock.actualPrice ? 'text-success' : 'text-error'">
-              R${{ stock.grahanFairPrice.toFixed(2) }}
-            </td>
-            <td :class="stock.grahanSafeMargin > 0 ? 'text-success' : 'text-error'">
-              {{ stock.grahanSafeMargin.toFixed(0) }}%
-            </td>
-            <td :class="stock.bazinFairPrice > stock.actualPrice ? 'text-success' : 'text-error'">
-              R${{ stock.bazinFairPrice.toFixed(2) }}
-            </td>
-            <td :class="stock.bazinSafeMargin > 0 ? 'text-success' : 'text-error'">
-              {{ stock.bazinSafeMargin.toFixed(0) }}%
-            </td>
-            <td>
-              <v-icon icon="mdi-close" @click="() => remove(i)" />
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-responsive>
+        <v-table>
+          <thead>
+            <tr>
+              <th class="text-left">
+                Ticker
+              </th>
+              <th class="text-left">
+                Preço atual
+              </th>
+              <th class="text-left">
+                Preço teto Grahan
+              </th>
+              <th class="text-left">
+                Margem de segurança Grahan
+              </th>
+              <th class="text-left">
+                Preço teto Bazin
+              </th>
+              <th class="text-left">
+                Margem de segurança Bazin
+              </th>
+              <th class="text-left"/>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(stock, i) in stocks"
+              :key="stock.ticker"
+            >
+              <td>{{ stock.ticker }}</td>
+              <td>R$ {{ stock.actualPrice.toFixed(2) }}</td>
+              <td :class="stock.grahanFairPrice > stock.actualPrice ? 'text-success' : 'text-error'">
+                R${{ stock.grahanFairPrice.toFixed(2) }}
+              </td>
+              <td :class="stock.grahanSafeMargin > 0 ? 'text-success' : 'text-error'">
+                {{ stock.grahanSafeMargin.toFixed(0) }}%
+              </td>
+              <td :class="stock.bazinFairPrice > stock.actualPrice ? 'text-success' : 'text-error'">
+                R${{ stock.bazinFairPrice.toFixed(2) }}
+              </td>
+              <td :class="stock.bazinSafeMargin > 0 ? 'text-success' : 'text-error'">
+                {{ stock.bazinSafeMargin.toFixed(0) }}%
+              </td>
+              <td>
+                <v-icon icon="mdi-close" @click="() => remove(i)" />
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -99,10 +105,17 @@ const toUpperCase = (t: string): void => {
 }
 
 const search = async (): Promise<void> => {
-  tickers.value.push(ticker.value)
-  ticker.value = ""
-  localStorage.setItem("tickers", tickers.value.join(","))
-  await getStocks(tickers.value)
+  const clone = [...tickers.value]
+  clone.push(ticker.value)
+
+  try {
+    await getStocks(clone)
+    tickers.value.push(ticker.value)
+    localStorage.setItem("tickers", tickers.value.join(","))
+    ticker.value = ""
+  } catch (err) {
+    console.error("Error searching stocks:", err);
+  }
 }
 
 const remove = async (index: number) => {
@@ -112,7 +125,7 @@ const remove = async (index: number) => {
 }
 
 const getStocks = async (tickers: string[]): Promise<void> => {
-  if (tickers.length === 0) {
+  if (tickers.length === 0 || tickers[0] === "") {
     return
   }
 
