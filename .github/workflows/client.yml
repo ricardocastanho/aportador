@@ -8,8 +8,6 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ROLE_TO_ASSUME:
-  BUCKET_NAME:
 
 permissions:
   id-token: write
@@ -63,9 +61,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy static site to S3 bucket
-        run: aws s3 sync ./dist/ s3://${{ env.BUCKET_NAME }}/ --delete --acl public-read
+        run: aws s3 sync ./dist/ s3://${{ secrets.BUCKET_NAME }}/ --delete --acl public-read
         working-directory: ./client
