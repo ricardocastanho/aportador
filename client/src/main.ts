@@ -13,16 +13,8 @@ import { createApp } from 'vue'
 // Plugins
 import { registerPlugins } from '@/plugins'
 
-import { inject } from "@vercel/analytics";
-
 const app = createApp(App)
 
 registerPlugins(app)
-
-const mode = import.meta.env.PROD ? "production" : "development";
-
-inject({
-  mode: mode,
-});
 
 app.mount('#app')

@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -45,28 +45,7 @@ func GetStocksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dividendYield, dividendHistory = 10.0, 3.0
-	var err error
-
-	dy := r.URL.Query().Get("dividendYield")
-	if dy != "" {
-		dividendYield, err = strconv.ParseFloat(dy, 64)
-		if err != nil {
-			sendErrorResponse(w, map[string]string{"message": "Error while parsing dividend yield input"})
-			return
-		}
-	}
-
-	dys := r.URL.Query().Get("dividendHistory")
-	if dys != "" {
-		dividendHistory, err = strconv.ParseFloat(dys, 64)
-		if err != nil {
-			sendErrorResponse(w, map[string]string{"message": "Error while parsing dividend years input"})
-			return
-		}
-	}
-
-	results, err := principles.GetStocks(stocks, dividendYield, dividendHistory)
+	results, err := principles.GetStocks(stocks)
 	if err != nil {
 		fmt.Println("Error getting stocks data:", err)
 		sendErrorResponse(w, map[string]string{"message": "Error getting stocks data"})
@@ -83,5 +62,9 @@ func CreateServer(port string) error {
 
 	fmt.Printf("Listening on port %s...\n", port)
 
-	return http.ListenAndServe(port, r)
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	return http.ListenAndServe(port, handlers.CORS(originsOk, headersOk, methodsOk)(r))
 }

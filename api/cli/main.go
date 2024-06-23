@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"aportador/principles"
@@ -8,6 +8,10 @@ import (
 
 	"github.com/urfave/cli/v2"
 )
+
+func main() {
+	CreateCLI()
+}
 
 func CreateCLI() error {
 	app := &cli.App{
@@ -25,25 +29,11 @@ func CreateCLI() error {
 						Usage:   "Stocks' ticker in Brazilian stock exchange splited by comma with no spaces",
 						Aliases: []string{"t"},
 					},
-					&cli.Float64Flag{
-						Name:    "dividend-yield",
-						Value:   6,
-						Usage:   "Dividend yield target in Bazin's principle",
-						Aliases: []string{"dy"},
-					},
-					&cli.Float64Flag{
-						Name:    "dividend-history",
-						Value:   5,
-						Usage:   "Number of years to get the dividend average per year in Bazin's formula",
-						Aliases: []string{"dh"},
-					},
 				},
 				Action: func(ctx *cli.Context) error {
 					tickers := ctx.StringSlice("tickers")
-					dividendYield := ctx.Float64("dividend-yield")
-					dividendHistory := ctx.Float64("dividend-history")
 
-					results, err := principles.GetStocks(tickers, dividendYield, dividendHistory)
+					results, err := principles.GetStocks(tickers)
 
 					if err != nil {
 						fmt.Println("Error getting stocks data.")
@@ -85,10 +75,9 @@ func PrintResults(results []principles.Result) {
 func PrintResult(result principles.Result) {
 	fmt.Println("-----------------")
 	fmt.Printf("Ticker: %s\n", result.Ticker)
-	fmt.Printf("Actual price: %f\n", result.ActualPrice)
-	fmt.Printf("Grahan fair price: %f\n", result.GrahanFairPrice)
-	fmt.Printf("Bazin fair price: %f\n", result.BazinFairPrice)
-	fmt.Printf("Grahan safe margin: %f\n", result.GrahanSafeMargin)
-	fmt.Printf("Bazin safe margin: %f\n", result.BazinSafeMargin)
+	fmt.Printf("Price: %s\n", result.Price)
+	fmt.Printf("Shares: %s\n", result.Shares)
+	fmt.Printf("Profit: %s\n", result.Profit)
+	fmt.Printf("Payout: %s\n", result.Payout)
 	fmt.Println("-----------------")
 }

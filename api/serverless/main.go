@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -22,19 +21,6 @@ type Response events.APIGatewayProxyResponse
 type CustomResponse struct {
 	Data  interface{} `json:"data"`
 	Error interface{} `json:"error"`
-}
-
-func getFloatParams(param string, defaultValue float64) (float64, error) {
-	if param == "" {
-		return defaultValue, nil
-	}
-
-	parsed, err := strconv.ParseFloat(param, 64)
-	if err != nil {
-		return parsed, err
-	}
-
-	return parsed, nil
 }
 
 func handleError(logger zerolog.Logger, msg string, err error, statusCode int) (Response, error) {
@@ -54,8 +40,6 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Respon
 		Str("requestId", request.RequestContext.RequestID).
 		Str("stocks", request.QueryStringParameters["stock"]).
 		// .Str("fiis", request.QueryStringParameters["fii"]).
-		Str("dividend-yield", request.QueryStringParameters["dividendYield"]).
-		Str("dividend-history", request.QueryStringParameters["dividendHistory"]).
 		Logger()
 
 	mainLogger.Debug().Msg("New request received")
@@ -68,23 +52,7 @@ func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (Respon
 		return handleError(mainLogger, "No tickers provided", fmt.Errorf("no tickers provided"), 200)
 	}
 
-	dividendYield, err := getFloatParams(request.QueryStringParameters["dividendYield"], 10.0)
-	if err != nil {
-		return handleError(mainLogger, err.Error(), err, 500)
-	}
-
-	dividendHistory, err := getFloatParams(request.QueryStringParameters["dividendHistory"], 3.0)
-	if err != nil {
-		return handleError(mainLogger, err.Error(), err, 500)
-	}
-
-	mainLogger.
-		Debug().
-		Float64("dividendYield", dividendYield).
-		Float64("dividendHistory", dividendHistory).
-		Msg("Search params")
-
-	results, err := principles.GetStocks(stocks, dividendYield, dividendHistory)
+	results, err := principles.GetStocks(stocks)
 	if err != nil {
 		return handleError(mainLogger, "Error while searching", err, 500)
 	}

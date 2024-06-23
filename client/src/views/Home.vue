@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="px-16">
     <v-row class="align-center text-center mt-16">
       <v-col>
         <h1 class="text-h2 font-weight-bold mb-2">Aportador</h1>
@@ -12,7 +12,7 @@
           variant="solo"
           class="ma-6"
           append-icon="mdi-magnify"
-          @update:model-value="(t) => toUpperCase(t)"
+          @update:model-value="(t) => ticker = toUpperCase(t)"
           @click:append="search"
         />
       </v-col>
@@ -29,19 +29,22 @@
                 Ticker
               </th>
               <th class="text-left">
-                Preço atual
+                Preço
               </th>
               <th class="text-left">
-                Preço teto Grahan
+                Yield Mínimo
               </th>
               <th class="text-left">
-                Margem de segurança Grahan
+                Payout
               </th>
               <th class="text-left">
-                Preço teto Bazin
+                Lucro Projetado
               </th>
               <th class="text-left">
-                Margem de segurança Bazin
+                DPA
+              </th>
+              <th class="text-left">
+                Preço teto
               </th>
               <th class="text-left"/>
             </tr>
@@ -52,21 +55,24 @@
               :key="stock.ticker"
             >
               <td>{{ stock.ticker }}</td>
-              <td>R$ {{ stock.actualPrice.toFixed(2) }}</td>
-              <td :class="stock.grahanFairPrice > stock.actualPrice ? 'text-success' : 'text-error'">
-                R${{ stock.grahanFairPrice.toFixed(2) }}
-              </td>
-              <td :class="stock.grahanSafeMargin > 0 ? 'text-success' : 'text-error'">
-                {{ stock.grahanSafeMargin.toFixed(0) }}%
-              </td>
-              <td :class="stock.bazinFairPrice > stock.actualPrice ? 'text-success' : 'text-error'">
-                R${{ stock.bazinFairPrice.toFixed(2) }}
-              </td>
-              <td :class="stock.bazinSafeMargin > 0 ? 'text-success' : 'text-error'">
-                {{ stock.bazinSafeMargin.toFixed(0) }}%
+              <td>R$ {{ stock.price }}</td>
+              <td>
+                <v-text-field suffix="%" v-model.number="input[stock.ticker].dy" @update:model-value="() => persistInput()" />
               </td>
               <td>
-                <v-icon icon="mdi-close" @click="() => remove(i)" />
+                <v-text-field suffix="%" v-model.number="input[stock.ticker].payout" @update:model-value="() => persistInput()" />
+              </td>
+              <td>
+                <v-text-field prefix="R$" v-model.string="input[stock.ticker].profit" @update:model-value="() => persistInput()" />
+              </td>
+              <td>
+                R$ {{ stock.dpa .toFixed(2)}}
+              </td>
+              <td :class="parseAmount(stock.price) < stock.ceilPrice ? 'text-success' : 'text-error'">
+                R$ {{ stock.ceilPrice.toFixed(2) }}
+              </td>
+              <td>
+                <v-icon icon="mdi-close" @click="() => remove(stock.ticker)" />
               </td>
             </tr>
           </tbody>
@@ -77,61 +83,84 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onBeforeMount } from "vue"
+import { ref, onBeforeMount, computed, reactive } from "vue"
 
-type Stock = {
+import { Stock, calculateDpa, getCeilPrice } from "../models/stock"
+import { parseAmount, toUpperCase } from "../utils"
+
+type StockRaw = {
   ticker: string
-  actualPrice: number
-  grahanFairPrice: number
-  bazinFairPrice: number
-  grahanSafeMargin: number
-  bazinSafeMargin: number
+  price: string
+  shares: string
+  profit: string
+  payout: string
 }
 
 type Response = {
-  data: Stock[]
+  data: StockRaw[]
   error: string
 }
 
-const API_URL = import.meta.env.VITE_API_URL || ""
-const savedTickers = localStorage.getItem("tickers")?.split(",") || []
-
-const tickers = ref<string[]>(savedTickers)
-const ticker = ref<string>("")
-const stocks = ref<Stock[]>([])
-
-const toUpperCase = (t: string): void => {
-  ticker.value = t.toUpperCase()
+type Input = {
+  [ticker: string]: {
+    dy: number,
+    payout: number,
+    profit: string,
+  }
 }
 
-const search = async (): Promise<void> => {
-  const clone = [...tickers.value]
-  clone.push(ticker.value)
+const API_URL = import.meta.env.VITE_API_URL || ""
+const savedInput: Input = JSON.parse(localStorage.getItem("data") ?? "{}")
 
+const input = reactive<Input>(savedInput)
+const ticker = ref<string>("")
+const stocksRaw = ref<StockRaw[]>([])
+
+const stocks = computed<Stock[]>(() => {
+  return stocksRaw.value.map((stock: StockRaw): Stock => {
+    const dpa = calculateDpa(input[stock.ticker].profit, stock.shares, input[stock.ticker].payout)
+
+    return {
+      ticker: stock.ticker,
+      price: stock.price,
+      shares: stock.shares,
+      profit: stock.profit,
+      payout: input[stock.ticker].payout.toString(),
+      dpa: dpa,
+      ceilPrice: getCeilPrice(dpa, input[stock.ticker].dy)
+    }
+  })
+})
+
+const search = async (): Promise<void> => {
   try {
-    await getStocks(clone)
-    tickers.value.push(ticker.value)
-    localStorage.setItem("tickers", tickers.value.join(","))
+    await getStocks([...Object.keys(input), ticker.value])
     ticker.value = ""
   } catch (err) {
     console.error("Error searching stocks:", err);
   }
 }
 
-const remove = async (index: number) => {
-  tickers.value.splice(index, 1)
-  stocks.value.splice(index, 1)
-  localStorage.setItem("tickers", tickers.value.join(","))
+const remove = async (ticker: string) => {
+  const index = stocksRaw.value.findIndex((stock: StockRaw): boolean => stock.ticker === ticker)
+  stocksRaw.value.splice(index, 1)
+  delete input[ticker]
+  localStorage.setItem("data", JSON.stringify(input))
+}
+
+const persistInput = () => {
+  localStorage.setItem("data", JSON.stringify(input))
 }
 
 const getStocks = async (tickers: string[]): Promise<void> => {
-  if (tickers.length === 0 || tickers[0] === "") {
+  if (tickers.length === 0) {
     return
   }
 
   let url = API_URL
 
-  url = url.concat("/search?")
+  url = url.concat("/stocks?")
+
   tickers.forEach((ticker, i) => {
     if (i !== 0) {
       url = url.concat("&")
@@ -142,11 +171,21 @@ const getStocks = async (tickers: string[]): Promise<void> => {
   const res = await fetch(url)
   const dataText = await res.text()
   const { data }: Response = JSON.parse(dataText)
-  stocks.value = [...data]
+
+  stocksRaw.value = [...data]
+
+  stocksRaw.value.forEach((s: StockRaw): void => {
+    input[s.ticker] = {
+      dy: input[s.ticker]?.dy ?? 6,
+      payout: input[s.ticker]?.payout ?? 30,
+      profit: input[s.ticker]?.profit ?? s.profit,
+    }
+  }, {} as Input)
+
+  localStorage.setItem("data", JSON.stringify(input))
 }
 
 onBeforeMount(async () => {
-  await getStocks(savedTickers || [])
+  await getStocks(Object.keys(input))
 })
-
 </script>

@@ -19,5 +19,5 @@ functions:
     handler: bin/aportador
     events:
       - httpApi:
-          path: /search
+          path: /stocks
           method: get
